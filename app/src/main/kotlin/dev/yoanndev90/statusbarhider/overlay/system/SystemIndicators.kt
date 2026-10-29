@@ -371,6 +371,8 @@ internal class SystemIndicators(
 			}
 		}
 		return try {
+			// 13 is WifiManager.WIFI_AP_STATE_ENABLED; the constant is @SystemApi
+			// so it is inlined here against the hidden "wifi_ap_state" global.
 			Settings.Global.getInt(context.contentResolver, "wifi_ap_state", 0) == 13
 		} catch (e: Exception) {
 			warn("isHotspotOn", e)

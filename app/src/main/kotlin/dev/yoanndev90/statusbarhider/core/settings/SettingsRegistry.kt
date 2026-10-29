@@ -73,7 +73,7 @@ object SettingsRegistry {
 	 * the file afterwards (service, tiles, widgets) so the overlay stack stays
 	 * the one place that knows how to restart itself.
 	 */
-	@Suppress("UNCHECKED_CAST")
+	@Suppress("UNCHECKED_CAST") // SettingStore<*> erases the value type; the default is the same T the store holds.
 	fun resetStore(store: SettingStore<*>) {
 		(store as SettingStore<Any>).replace(store.default)
 	}

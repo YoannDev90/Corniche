@@ -11,10 +11,13 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import android.os.Handler
 import android.provider.Settings
+import android.util.Log
 import androidx.core.content.ContextCompat
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+
+private const val TAG = "SystemFlows"
 
 /*
  * The system signals the overlay listens to, as cold flows.
@@ -88,7 +91,10 @@ internal fun Context.torchFlow(handler: Handler): Flow<Pair<String, Boolean>> =
 			}
 		try {
 			cm.registerTorchCallback(cb, handler)
-		} catch (_: Exception) {
+		} catch (e: Exception) {
+			// No torch (or a restricted camera service): fail loud instead of a
+			// flow that just never emits.
+			Log.w(TAG, "registerTorchCallback", e)
 			return@callbackFlow
 		}
 		awaitClose { runSafely(this@torchFlow) { cm.unregisterTorchCallback(cb) } }

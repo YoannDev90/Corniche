@@ -131,8 +131,16 @@ class StatusViewModel(
 	fun checkState() {
 		ShellRunner.run(getApplication(), "reading state...") { oem ->
 			for (cmd in oem.status) {
-				val (_, out) = ShellRunner.run(cmd.cmd)
-				appendLog("${cmd.name} = ${out.ifEmpty { "(empty)" }}")
+				// stderr is merged into `out`: a non-zero exit must be labelled as
+				// a failure, not printed as if it were the setting's real value.
+				val (exit, out) = ShellRunner.run(cmd.cmd)
+				val shown =
+					if (exit != 0) {
+						"(exit $exit) ${out.ifEmpty { "(no output)" }}"
+					} else {
+						out.ifEmpty { "(empty)" }
+					}
+				appendLog("${cmd.name} = $shown")
 			}
 		}
 	}

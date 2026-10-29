@@ -3,6 +3,7 @@ package dev.yoanndev90.statusbarhider.overlay.system
 import android.content.res.Resources
 import android.graphics.Rect
 import android.os.Build
+import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import dev.yoanndev90.statusbarhider.core.settings.OverlayPrefs
@@ -15,6 +16,8 @@ import dev.yoanndev90.statusbarhider.overlay.model.CameraGeometry
  * All framework reads are null-safe and version-guarded (cutout needs API 28+).
  */
 object InsetsUtils {
+	private const val TAG = "InsetsUtils"
+
 	/** Bounding rects of the display cutout for the attached view (empty if none). */
 	fun cutoutRects(view: View): List<Rect> {
 		if (Build.VERSION.SDK_INT < 28) return emptyList()
@@ -23,7 +26,9 @@ object InsetsUtils {
 				?.displayCutout
 				?.boundingRects
 				?.toList() ?: emptyList()
-		} catch (_: Exception) {
+		} catch (e: Exception) {
+			// Rare (API 28+ path); without a trace an absent notch looks like a bug.
+			Log.w(TAG, "cutoutRects", e)
 			emptyList()
 		}
 	}

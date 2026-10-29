@@ -379,7 +379,9 @@ class StatusBarOverlayService :
 						?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 						?: return
 				)
-			} catch (_: Exception) {
+			} catch (e: Exception) {
+				// Even the package-manager fallback failed (no calendar app at all).
+				Log.w(TAG, "open calendar", e)
 			}
 		}
 	}

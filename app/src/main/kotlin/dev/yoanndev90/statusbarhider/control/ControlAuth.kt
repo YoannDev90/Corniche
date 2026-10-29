@@ -30,7 +30,9 @@ import java.security.MessageDigest
  * app gets no disk-write primitive through this receiver.
  */
 object ControlAuth {
-	private const val TAG = "ControlActions"
+	// Its own tag: logging rejections under "ControlActions" made them
+	// indistinguishable from dispatch logs when grepping logcat.
+	private const val TAG = "ControlAuth"
 
 	/** String extra name: `--es token <value>` on adb, Extra `token` in Tasker. */
 	const val EXTRA_TOKEN = "token"
