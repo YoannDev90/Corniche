@@ -1,4 +1,4 @@
-# StatusBar Hider
+# Corniche
 
 ![No internet](https://img.shields.io/badge/no-internet-brightgreen?style=for-the-badge)
 ![CI](https://img.shields.io/github/actions/workflow/status/Yoanndev90/StatusBar-Hider/ci.yml?branch=master&style=for-the-badge)
@@ -10,6 +10,7 @@
 ![Shizuku API](https://img.shields.io/badge/Shizuku%20API-13.1.5-4A6572?style=for-the-badge)
 ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/Yoanndev90/StatusBar-Hider/total?style=for-the-badge)
 ![GitHub repo size](https://img.shields.io/github/repo-size/Yoanndev90/StatusBar-Hider?style=for-the-badge)
+[![Discord](https://img.shields.io/discord/1563669764633788459?color=blue&label=Discord&logo=discord&style=for-the-badge)](https://discord.gg/4VazzbfP7H)
 
 Hide the Android status bar system-wide — launcher included — using
 [Shizuku](https://shizuku.rikka.app/). No system app is ever uninstalled, and
