@@ -28,10 +28,9 @@ updates:
         patterns:
           - "*"
 
-  - package-ecosystem: cargo
-    directory: /tools/logstream
-    schedule:
-      interval: monthly
+  # No cargo ecosystem here: the Rust tools live in the android-tools/
+  # submodule, a separate repository Dependabot of this repo cannot reach
+  # (the old /tools/logstream entry pointed at a folder that never existed).
 
   - package-ecosystem: pre-commit
     directory: /
