@@ -232,7 +232,8 @@ OEM notes. To promote a config to tested:
 ## Where new code goes
 
 Everything UI-related lives under a single `ui/` roof. Pick the sub-package by
-what the code *is*:
+what the code *is* — the full package map (what every top-level package is
+for) lives in [docs/architecture.md](docs/architecture.md):
 
 | You are adding… | Put it in |
 |---|---|
