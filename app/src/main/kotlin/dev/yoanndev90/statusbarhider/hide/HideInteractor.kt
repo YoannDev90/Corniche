@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.service.quicksettings.TileService
 import android.util.Log
+import dev.yoanndev90.statusbarhider.core.APP_PREFS_NAME
 import dev.yoanndev90.statusbarhider.core.command.ShellRunner
 import dev.yoanndev90.statusbarhider.core.log.LogStore
 import dev.yoanndev90.statusbarhider.data.OemRepository
@@ -33,7 +34,6 @@ import dev.yoanndev90.statusbarhider.widget.BarWidgetProvider as BarWidget
  */
 object HideInteractor {
 	private const val TAG = "HideInteractor"
-	private const val PREFS_NAME = "statusbarhider"
 	private const val KEY_HIDDEN = "status_bar_hidden"
 
 	/** Bits the last successful hide read back; -1 until one has run. */
@@ -235,5 +235,5 @@ object HideInteractor {
 	}
 
 	private fun prefs(context: Context): SharedPreferences =
-		context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+		context.applicationContext.getSharedPreferences(APP_PREFS_NAME, Context.MODE_PRIVATE)
 }

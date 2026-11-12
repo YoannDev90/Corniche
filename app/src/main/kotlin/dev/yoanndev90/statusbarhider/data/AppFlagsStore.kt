@@ -2,6 +2,7 @@ package dev.yoanndev90.statusbarhider.data
 
 import android.content.Context
 import android.content.SharedPreferences
+import dev.yoanndev90.statusbarhider.core.APP_PREFS_NAME
 import dev.yoanndev90.statusbarhider.core.settings.BoolSpec
 import dev.yoanndev90.statusbarhider.core.settings.SettingSpec
 import java.security.SecureRandom
@@ -30,7 +31,7 @@ object AppFlagSpecs {
 }
 
 /**
- * The app flags file: the same "statusbarhider" SharedPreferences as ever,
+ * The app flags file: the same [APP_PREFS_NAME] SharedPreferences as ever,
  * described here so the registry can list and reset the flags too. The
  * storage keys are unchanged; nothing migrates.
  *
@@ -62,10 +63,9 @@ class AppFlagsStore private constructor(
 	}
 
 	private fun prefs(): SharedPreferences =
-		app.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+		app.applicationContext.getSharedPreferences(APP_PREFS_NAME, Context.MODE_PRIVATE)
 
 	companion object {
-		private const val PREFS_NAME = "statusbarhider"
 		private const val KEY_SETUP_DONE = "setup_done"
 		private const val KEY_CONTROL_TOKEN = "control_token"
 

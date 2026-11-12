@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Build
 import android.util.Log
 import dev.yoanndev90.statusbarhider.R
+import dev.yoanndev90.statusbarhider.core.APP_PREFS_NAME
 import dev.yoanndev90.statusbarhider.core.log.LogStore
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -12,7 +13,6 @@ import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonObject
 import java.util.concurrent.ConcurrentHashMap
 
-private const val PREFS_NAME = "statusbarhider"
 private const val PREF_OEM_ID = "oem_id"
 
 class OemConfigException(
@@ -86,7 +86,7 @@ data class OemConfig(
 
 		fun getSavedId(context: Context): String? =
 			context
-				.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+				.getSharedPreferences(APP_PREFS_NAME, Context.MODE_PRIVATE)
 				.getString(PREF_OEM_ID, null)
 
 		/**
@@ -98,7 +98,7 @@ data class OemConfig(
 			id: String?
 		) {
 			context
-				.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+				.getSharedPreferences(APP_PREFS_NAME, Context.MODE_PRIVATE)
 				.edit()
 				.putString(PREF_OEM_ID, id)
 				.apply()
