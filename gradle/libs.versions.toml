@@ -1,5 +1,5 @@
 [versions]
-agp = "9.5.0"
+agp = "9.5.1"
 activity = "1.13.0"
 androidxCore = "1.19.1"
 api = "13.1.5"
