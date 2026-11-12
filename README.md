@@ -36,7 +36,10 @@ The name is also a nod to the fact that the app grew well beyond hiding the
 system bar — it is now mostly a custom status bar (widgets, lock screen,
 profiles, control API), and the hide/restore commands are just the
 lever underneath. The launcher label changed from *StatusBar Hider* to
-*Corniche*; the package name, repository and control API are unchanged.
+*Corniche*; the repository and control API are unchanged. The package name is
+unchanged for now, but this is the last release under it: the successor
+`dev.yoanndev90.corniche` is already bridged so the rename can carry settings
+over (see [Features](docs/features.md)).
 
 ## Requirements
 
@@ -52,9 +55,14 @@ lever underneath. The launcher label changed from *StatusBar Hider* to
 ## Quick start
 
 ```bash
-mise install        # dev tooling (JDK 21, pre-commit, ktlint)
-mise run install    # build + install the release APK
+mise install           # dev tooling (JDK 21, pre-commit, ktlint)
+mise run install-debug # build + install the debug APK (no keystore needed)
 ```
+
+`mise run install` builds the **release** APK instead — that one needs the
+gitignored keystore set up first, because a fresh clone produces an *unsigned*
+release APK which `adb install` rejects (see
+[Build & signing](docs/building.md)).
 
 You also need an **Android SDK** (`ANDROID_HOME`). The **JDK 21** comes with
 `mise install` (`java = "21"` in `mise.toml`) — no separate install.
