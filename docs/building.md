@@ -6,12 +6,18 @@
 |---------------------------|----------------------------------|
 | `mise run build`          | Build signed release APK         |
 | `mise run debug`          | Build debug APK                  |
+| `mise run test`           | Run unit tests                   |
+| `mise run lint`           | Run Android lint                 |
+| `mise run ktlint`         | Check Kotlin formatting (no rewrite) |
+| `mise run check`          | Quality gate CI runs: format, static analysis, tests, lint |
+| `mise run format`         | Run ktlint format                |
 | `mise run install`        | Build + install release APK      |
 | `mise run install-debug`  | Build + install debug APK        |
 | `mise run clean`          | Clean Gradle outputs             |
 | `mise run devices`        | List connected ADB devices       |
 | `mise run logs`           | Live log TUI (logstream)         |
 | `mise run uninstall`      | Uninstall the app from device    |
+| `mise run setup-hooks`    | Install git hooks (pre-commit + commit-msg) |
 
 Building needs an **Android SDK** (`ANDROID_HOME`) with the
 `platforms;android-37.0` and `build-tools;37.0.0` packages - neither is
@@ -67,6 +73,9 @@ storePassword=<password>
 keyAlias=statusbarhider
 keyPassword=<password>
 ```
+
+Releases themselves are cut from a `v*` tag by CI — see
+[Release process](release-process.md).
 
 ## Debug vs release
 
