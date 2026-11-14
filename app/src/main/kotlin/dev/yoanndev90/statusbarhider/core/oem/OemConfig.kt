@@ -5,9 +5,9 @@ import android.os.Build
 import android.util.Log
 import dev.yoanndev90.statusbarhider.R
 import dev.yoanndev90.statusbarhider.core.APP_PREFS_NAME
+import dev.yoanndev90.statusbarhider.core.appJson
 import dev.yoanndev90.statusbarhider.core.log.LogStore
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonObject
@@ -69,12 +69,6 @@ data class OemConfig(
 
 		/** Config used when no file matches the device (stock AOSP defaults). */
 		private const val DEFAULT_ID = "aosp"
-
-		/** Reader shared by every config file in assets/oem. */
-		private val json = Json {
-			ignoreUnknownKeys = true
-			coerceInputValues = true
-		}
 
 		fun listAvailable(context: Context): List<String> =
 			context.assets
@@ -197,7 +191,7 @@ data class OemConfig(
 			id: String,
 			raw: String
 		): OemConfig {
-			val root = json.parseToJsonElement(raw).jsonObject
+			val root = appJson.parseToJsonElement(raw).jsonObject
 
 			// Read before decoding so a too-new config is rejected with a clear
 			// message instead of a plain decoding error.
@@ -209,7 +203,7 @@ data class OemConfig(
 				)
 			}
 
-			val file = json.decodeFromJsonElement(OemConfigFile.serializer(), root)
+			val file = appJson.decodeFromJsonElement(OemConfigFile.serializer(), root)
 
 			return OemConfig(
 				id = id,

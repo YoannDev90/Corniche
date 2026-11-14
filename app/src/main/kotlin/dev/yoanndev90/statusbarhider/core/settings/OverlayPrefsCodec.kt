@@ -1,5 +1,6 @@
 package dev.yoanndev90.statusbarhider.core.settings
 
+import dev.yoanndev90.statusbarhider.core.appJson
 import dev.yoanndev90.statusbarhider.core.settings.specs.OverlaySpecs
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -7,7 +8,6 @@ import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
-import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
@@ -27,16 +27,8 @@ import kotlinx.serialization.json.jsonObject
  * backup file when a user actually needs one converted.
  */
 object OverlayPrefsCodec {
-	/** Shared reader / writer for the stored blob. */
-	private val json =
-		Json {
-			ignoreUnknownKeys = true
-			coerceInputValues = true
-			encodeDefaults = true
-		}
-
 	/** Stored shape of [prefs]. */
-	fun toJson(prefs: OverlayPrefs): String = json.encodeToString(OverlayPrefs.serializer(), prefs)
+	fun toJson(prefs: OverlayPrefs): String = appJson.encodeToString(OverlayPrefs.serializer(), prefs)
 
 	/**
 	 * Parses the stored blob, then clamps it through [OverlaySpecs.normalize].
@@ -45,7 +37,7 @@ object OverlayPrefsCodec {
 	 */
 	fun fromJson(raw: String): OverlayPrefs? =
 		try {
-			OverlaySpecs.normalize(json.decodeFromString(OverlayPrefs.serializer(), raw))
+			OverlaySpecs.normalize(appJson.decodeFromString(OverlayPrefs.serializer(), raw))
 		} catch (_: Exception) {
 			null
 		}
@@ -56,7 +48,7 @@ object OverlayPrefsCodec {
 	 * exactly like [fromJson].
 	 */
 	fun decodeStrict(element: JsonElement): OverlayPrefs =
-		OverlaySpecs.normalize(json.decodeFromJsonElement(OverlayPrefs.serializer(), element))
+		OverlaySpecs.normalize(appJson.decodeFromJsonElement(OverlayPrefs.serializer(), element))
 
 	/**
 	 * The subset of [prefs] described by [specs], minus the ones marked
@@ -68,7 +60,7 @@ object OverlayPrefsCodec {
 		prefs: OverlayPrefs,
 		specs: List<SettingSpec<*, OverlayPrefs>>
 	): JsonObject {
-		val all = json.parseToJsonElement(toJson(prefs)).jsonObject
+		val all = appJson.parseToJsonElement(toJson(prefs)).jsonObject
 		val exportable = specs.filter { it.exportable }.map { it.key }.toSet()
 		return JsonObject(all.filterKeys { it in exportable })
 	}

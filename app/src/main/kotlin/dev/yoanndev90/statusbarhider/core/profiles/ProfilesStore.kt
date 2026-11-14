@@ -1,8 +1,8 @@
 package dev.yoanndev90.statusbarhider.core.profiles
 
+import dev.yoanndev90.statusbarhider.core.appJson
 import dev.yoanndev90.statusbarhider.core.settings.OverlayPrefs
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 import java.util.UUID
 
 /** One named snapshot of the overlay settings. */
@@ -33,20 +33,13 @@ object ProfilesStore {
 	/** Names are user input: trimmed, capped, never blank. */
 	const val MAX_NAME_LENGTH = 40
 
-	/** Shared reader / writer, same flags as the overlay blob. */
-	private val json = Json {
-		ignoreUnknownKeys = true
-		coerceInputValues = true
-		encodeDefaults = true
-	}
-
 	/** Fresh unique id for a new profile. */
 	fun newId(): String = UUID.randomUUID().toString()
 
 	/** Trims and caps a user-supplied name; blank stays blank for the caller to reject. */
 	fun sanitizeName(raw: String): String = raw.trim().take(MAX_NAME_LENGTH)
 
-	fun encode(state: ProfilesState): String = json.encodeToString(ProfilesState.serializer(), state)
+	fun encode(state: ProfilesState): String = appJson.encodeToString(ProfilesState.serializer(), state)
 
 	/**
 	 * Parses the stored blob, normalizing every snapshot's prefs like a normal
@@ -54,7 +47,7 @@ object ProfilesStore {
 	 */
 	fun parse(raw: String): ProfilesState? =
 		try {
-			val state = json.decodeFromString(ProfilesState.serializer(), raw)
+			val state = appJson.decodeFromString(ProfilesState.serializer(), raw)
 			state.copy(profiles = state.profiles.map { it.normalizePrefs() })
 		} catch (_: Exception) {
 			null
@@ -62,7 +55,7 @@ object ProfilesStore {
 
 	/** Round-trips the snapshot's prefs through the strict decoder to clamp values. */
 	private fun Profile.normalizePrefs(): Profile {
-		val element = json.parseToJsonElement(json.encodeToString(OverlayPrefs.serializer(), prefs))
+		val element = appJson.parseToJsonElement(appJson.encodeToString(OverlayPrefs.serializer(), prefs))
 		return copy(prefs = OverlayPrefs.decodeStrict(element))
 	}
 }

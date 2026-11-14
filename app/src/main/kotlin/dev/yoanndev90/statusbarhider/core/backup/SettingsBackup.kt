@@ -4,13 +4,13 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.core.content.FileProvider
+import dev.yoanndev90.statusbarhider.core.appJson
 import dev.yoanndev90.statusbarhider.core.oem.OemConfig
 import dev.yoanndev90.statusbarhider.core.settings.OverlayPrefs
 import dev.yoanndev90.statusbarhider.core.settings.OverlayPrefsCodec
 import dev.yoanndev90.statusbarhider.data.OemRepository
 import dev.yoanndev90.statusbarhider.data.OemStore
 import dev.yoanndev90.statusbarhider.data.OverlayPrefsRepository
-import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.intOrNull
@@ -45,13 +45,6 @@ object SettingsBackup {
 	private const val KEY_OEM = "oem_id"
 	private const val KEY_OVERLAY = "overlay"
 
-	private val json =
-		Json {
-			ignoreUnknownKeys = true
-			coerceInputValues = true
-			encodeDefaults = true
-		}
-
 	/** Parsed backup: [prefs] is normalized the same way a normal load is. */
 	data class Backup(
 		val oemId: String,
@@ -73,7 +66,7 @@ object SettingsBackup {
 					KEY_OVERLAY to OverlayPrefsCodec.exportJson(overlay)
 				)
 			)
-		return json.encodeToString(JsonObject.serializer(), root)
+		return appJson.encodeToString(JsonObject.serializer(), root)
 	}
 
 	/** Writes [export] to the cache and shares it through the file provider. */
@@ -145,7 +138,7 @@ object SettingsBackup {
 		checkSize(raw)
 		val root =
 			try {
-				json.parseToJsonElement(raw).jsonObject
+				appJson.parseToJsonElement(raw).jsonObject
 			} catch (e: Exception) {
 				throw SettingsBackupException("Not a valid JSON file: ${e.message}", e)
 			}
