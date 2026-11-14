@@ -8,14 +8,12 @@ import android.content.IntentFilter
 import android.content.res.Configuration
 import android.location.LocationManager
 import android.net.ConnectivityManager
-import android.net.Uri
 import android.nfc.NfcAdapter
 import android.os.BatteryManager
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.os.PowerManager
-import android.provider.AlarmClock
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -23,6 +21,7 @@ import androidx.compose.runtime.setValue
 import dev.yoanndev90.statusbarhider.core.command.ShellRunner
 import dev.yoanndev90.statusbarhider.core.log.LogStore
 import dev.yoanndev90.statusbarhider.core.settings.OverlayPrefs
+import dev.yoanndev90.statusbarhider.core.settings.WidgetId
 import dev.yoanndev90.statusbarhider.core.usage.UsageAccess
 import dev.yoanndev90.statusbarhider.core.watcher.SystemUiWatcher
 import dev.yoanndev90.statusbarhider.data.OverlayPrefsRepository
@@ -37,7 +36,6 @@ import dev.yoanndev90.statusbarhider.overlay.system.SystemIndicators
 import dev.yoanndev90.statusbarhider.overlay.system.SystemStatusReader
 import dev.yoanndev90.statusbarhider.overlay.system.networkFlow
 import dev.yoanndev90.statusbarhider.overlay.system.receiverFlow
-import dev.yoanndev90.statusbarhider.overlay.system.runSafely
 import dev.yoanndev90.statusbarhider.overlay.system.systemSettingsFlow
 import dev.yoanndev90.statusbarhider.overlay.system.torchFlow
 import dev.yoanndev90.statusbarhider.overlay.widgets.OverlayBar
@@ -364,32 +362,12 @@ class StatusBarOverlayService :
 
 	private fun onClockClick() {
 		if (!prefs.interactive) return
-		runSafely(this@StatusBarOverlayService) {
-			startActivity(
-				Intent(AlarmClock.ACTION_SHOW_ALARMS)
-					.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-			)
-		}
+		BarTapActions.open(this, WidgetId.CLOCK)
 	}
 
 	private fun onDateClick() {
 		if (!prefs.interactive) return
-		try {
-			val uri = Uri.parse("content://com.android.calendar/time")
-			startActivity(Intent(Intent.ACTION_VIEW, uri).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-		} catch (_: Exception) {
-			try {
-				startActivity(
-					packageManager
-						.getLaunchIntentForPackage("com.google.android.calendar")
-						?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-						?: return
-				)
-			} catch (e: Exception) {
-				// Even the package-manager fallback failed (no calendar app at all).
-				Log.w(TAG, "open calendar", e)
-			}
-		}
+		BarTapActions.open(this, WidgetId.DATE)
 	}
 
 	/**

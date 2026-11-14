@@ -1,16 +1,13 @@
 package dev.yoanndev90.statusbarhider.overlay
 
 import android.accessibilityservice.AccessibilityService
-import android.content.Intent
-import android.net.Uri
-import android.provider.AlarmClock
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshotFlow
 import dev.yoanndev90.statusbarhider.core.settings.OverlayPrefs
+import dev.yoanndev90.statusbarhider.core.settings.WidgetId
 import dev.yoanndev90.statusbarhider.data.OverlayPrefsRepository
-import dev.yoanndev90.statusbarhider.overlay.system.runSafely
 import dev.yoanndev90.statusbarhider.overlay.widgets.OverlayBar
 import dev.yoanndev90.statusbarhider.overlay.window.OverlayWindow
 import dev.yoanndev90.statusbarhider.overlay.window.SharedBar
@@ -79,28 +76,12 @@ class LockScreenOverlayService : AccessibilityService() {
 
 	private fun onClockClick() {
 		if (!prefsState.value.interactive) return
-		runSafely(this) {
-			startActivity(
-				Intent(AlarmClock.ACTION_SHOW_ALARMS)
-					.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-			)
-		}
+		BarTapActions.open(this, WidgetId.CLOCK)
 	}
 
 	private fun onDateClick() {
 		if (!prefsState.value.interactive) return
-		runSafely(this) {
-			try {
-				startActivity(
-					Intent(Intent.ACTION_VIEW, Uri.parse("content://com.android/calendar/time"))
-						.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-				)
-			} catch (_: Exception) {
-				packageManager
-					.getLaunchIntentForPackage("com.google.android.calendar")
-					?.let { startActivity(it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
-			}
-		}
+		BarTapActions.open(this, WidgetId.DATE)
 	}
 
 	override fun onAccessibilityEvent(event: AccessibilityEvent?) = Unit
