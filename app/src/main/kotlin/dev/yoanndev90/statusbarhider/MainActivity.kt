@@ -64,7 +64,7 @@ class MainActivity : ComponentActivity() {
 	 * thrown away and the dialog reappeared on every launch.
 	 */
 	private fun requestNotificationPermissionIfNeeded() {
-		if (Build.VERSION.SDK_INT < 33) return
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
 		if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) return
 		notificationsPermission.launch(android.Manifest.permission.POST_NOTIFICATIONS)
 	}
@@ -75,7 +75,7 @@ class MainActivity : ComponentActivity() {
 	 * overlay keeps the generic Bluetooth glyph.
 	 */
 	private fun requestBluetoothPermissionIfNeeded() {
-		if (Build.VERSION.SDK_INT < 31) return
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return
 		if (checkSelfPermission(android.Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) return
 		bluetoothPermission.launch(android.Manifest.permission.BLUETOOTH_CONNECT)
 	}

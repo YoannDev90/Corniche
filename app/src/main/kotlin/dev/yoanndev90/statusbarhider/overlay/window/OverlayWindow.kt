@@ -108,7 +108,7 @@ internal class OverlayWindow(
 				PixelFormat.TRANSLUCENT
 			)
 		params.gravity = Gravity.TOP
-		if (Build.VERSION.SDK_INT >= 28) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
 			params.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
 		}
 		val view =

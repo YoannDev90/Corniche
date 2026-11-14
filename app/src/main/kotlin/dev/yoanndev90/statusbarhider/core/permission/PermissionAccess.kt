@@ -53,7 +53,7 @@ object PermissionAccess {
 
 	/** Below Android 12 the legacy install-time permission covers the device list. */
 	private fun bluetoothGranted(context: Context): Boolean =
-		Build.VERSION.SDK_INT < 31 ||
+		Build.VERSION.SDK_INT < Build.VERSION_CODES.S ||
 			context.checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED
 
 	/** True when [LockScreenOverlayService] is in the enabled accessibility services list. */

@@ -80,13 +80,13 @@ fun DebugPermissionsScreen(vm: StatusViewModel) {
 					label = R.string.perm_phone_state,
 					granted = loaded.phoneState
 				) { phoneStateLauncher.launch(Manifest.permission.READ_PHONE_STATE) }
-				if (Build.VERSION.SDK_INT >= 33) {
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
 					SettingStatusRow(
 						label = R.string.perm_post_notifs,
 						granted = loaded.postNotifs
 					) { notificationsLauncher.launch(Manifest.permission.POST_NOTIFICATIONS) }
 				}
-				if (Build.VERSION.SDK_INT >= 31) {
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
 					SettingStatusRow(
 						label = R.string.perm_bluetooth,
 						granted = loaded.bluetooth

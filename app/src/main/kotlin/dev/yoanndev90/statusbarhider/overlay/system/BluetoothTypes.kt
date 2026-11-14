@@ -270,7 +270,7 @@ internal class BluetoothTypes(
 		devices: List<BluetoothDevice>,
 		overrides: Map<String, String>
 	): List<BtDevicePreview> {
-		if (Build.VERSION.SDK_INT >= 31 &&
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
 			context.checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED
 		) {
 			return emptyList()

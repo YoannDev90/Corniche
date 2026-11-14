@@ -42,7 +42,7 @@ internal fun Service.startOverlayForeground() {
 			.setSmallIcon(R.drawable.ic_tile_bar)
 			.build()
 	try {
-		if (Build.VERSION.SDK_INT >= 34) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
 			startForeground(NOTIF_ID, notif, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
 		} else {
 			startForeground(NOTIF_ID, notif)

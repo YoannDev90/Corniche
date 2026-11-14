@@ -79,7 +79,7 @@ private fun TestNotificationRow() {
 			}
 		}
 	SettingAction(R.drawable.ic_campaign, R.string.action_test_notification) {
-		if (Build.VERSION.SDK_INT >= 33 &&
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
 			context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
 		) {
 			permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)

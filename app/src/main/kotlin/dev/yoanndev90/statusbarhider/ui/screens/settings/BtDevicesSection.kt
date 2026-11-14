@@ -51,7 +51,7 @@ internal fun BtDevicesSection(
 ) {
 	val app = LocalContext.current.applicationContext
 	val permission =
-		Build.VERSION.SDK_INT < 31 ||
+		Build.VERSION.SDK_INT < Build.VERSION_CODES.S ||
 			app.checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED
 
 	// Loaded once per entry; override changes re-render locally, not through a reload.

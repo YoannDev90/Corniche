@@ -160,7 +160,7 @@ internal class BluetoothProfiles(
  */
 internal suspend fun SystemIndicators.connectedBluetoothIcons(prefs: OverlayPrefs): List<BtDeviceIcon> {
 	if (!prefs.showBtIcons) return emptyList()
-	if (Build.VERSION.SDK_INT >= 31 &&
+	if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
 		context.checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED
 	) {
 		return emptyList()

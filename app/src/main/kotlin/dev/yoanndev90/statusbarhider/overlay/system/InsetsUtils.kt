@@ -20,7 +20,7 @@ object InsetsUtils {
 
 	/** Bounding rects of the display cutout for the attached view (empty if none). */
 	fun cutoutRects(view: View): List<Rect> {
-		if (Build.VERSION.SDK_INT < 28) return emptyList()
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) return emptyList()
 		return try {
 			view.rootWindowInsets
 				?.displayCutout
