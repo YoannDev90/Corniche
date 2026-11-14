@@ -1,4 +1,5 @@
 package dev.yoanndev90.statusbarhider.overlay
+
 import android.accessibilityservice.AccessibilityService
 import android.content.Intent
 import android.net.Uri

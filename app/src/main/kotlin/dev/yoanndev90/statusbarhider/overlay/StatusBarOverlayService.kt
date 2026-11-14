@@ -1,4 +1,5 @@
 package dev.yoanndev90.statusbarhider.overlay
+
 import android.app.Service
 import android.content.ComponentName
 import android.content.Context

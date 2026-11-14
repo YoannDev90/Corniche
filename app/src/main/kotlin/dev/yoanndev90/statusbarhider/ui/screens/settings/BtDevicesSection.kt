@@ -1,4 +1,5 @@
 package dev.yoanndev90.statusbarhider.ui.screens.settings
+
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
