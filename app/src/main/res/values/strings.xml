@@ -236,7 +236,7 @@
     <string name="switch_bandwidth_sub">Polled every second</string>
     <string name="switch_merged_speed">Merged up/down speed</string>
     <string name="switch_touchable_bar">Touchable bar</string>
-    <string name="switch_touchable_bar_sub">Tap clock/date; may block swipe-down</string>
+    <string name="switch_touchable_bar_sub">Tap widgets to open them; swipe down from the bar opens notifications</string>
     <string name="switch_dark_text">Dark text</string>
     <string name="switch_dark_text_sub">For a transparent bar</string>
     <string name="switch_use_24h">24-hour clock</string>
