@@ -26,20 +26,40 @@ internal object BarTapActions {
 	private const val EXPAND_NOTIFICATIONS = "cmd statusbar expand-notifications"
 	private const val EXPAND_TIMEOUT_SEC = 5L
 
+	/** Where the tap on a widget leads; the whole dispatch table lives here. */
+	internal enum class Target { CLOCK, CALENDAR, NOTIFICATIONS, BATTERY, DATA_USAGE, WIFI, MEDIA }
+
+	/**
+	 * The target of [id], or null for a widget with none (the spacer, and any
+	 * id a future version adds before wiring it). Kept separate from [open] so
+	 * the table can be asserted without an Android runtime.
+	 */
+	internal fun targetOf(id: String): Target? =
+		when (id) {
+			WidgetId.CLOCK, WidgetId.ALARM -> Target.CLOCK
+			WidgetId.DATE, WidgetId.CALENDAR -> Target.CALENDAR
+			WidgetId.NOTIFS -> Target.NOTIFICATIONS
+			WidgetId.BATTERY -> Target.BATTERY
+			WidgetId.BANDWIDTH -> Target.DATA_USAGE
+			WidgetId.CONNECTIVITY -> Target.WIFI
+			WidgetId.MEDIA -> Target.MEDIA
+			else -> null
+		}
+
 	/**
 	 * Opens whatever the widget [id] stands for. Suspends only for
 	 * [WidgetId.NOTIFS], which asks SystemUI for the panel through the shell.
 	 */
 	suspend fun open(context: Context, id: String) {
-		when (id) {
-			WidgetId.CLOCK, WidgetId.ALARM -> openAction(context, AlarmClock.ACTION_SHOW_ALARMS)
-			WidgetId.DATE, WidgetId.CALENDAR -> openDate(context)
-			WidgetId.NOTIFS -> expandNotifications(context)
-			WidgetId.BATTERY -> openAction(context, Intent.ACTION_POWER_USAGE_SUMMARY)
-			WidgetId.BANDWIDTH -> openAction(context, Settings.ACTION_DATA_USAGE_SETTINGS)
-			WidgetId.CONNECTIVITY -> openAction(context, Settings.ACTION_WIFI_SETTINGS)
-			WidgetId.MEDIA -> openMedia(context)
-			else -> Unit
+		when (targetOf(id)) {
+			Target.CLOCK -> openAction(context, AlarmClock.ACTION_SHOW_ALARMS)
+			Target.CALENDAR -> openDate(context)
+			Target.NOTIFICATIONS -> expandNotifications(context)
+			Target.BATTERY -> openAction(context, Intent.ACTION_POWER_USAGE_SUMMARY)
+			Target.DATA_USAGE -> openAction(context, Settings.ACTION_DATA_USAGE_SETTINGS)
+			Target.WIFI -> openAction(context, Settings.ACTION_WIFI_SETTINGS)
+			Target.MEDIA -> openMedia(context)
+			null -> Unit
 		}
 	}
 
