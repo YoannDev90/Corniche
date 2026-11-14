@@ -21,7 +21,6 @@ import androidx.compose.runtime.setValue
 import dev.yoanndev90.statusbarhider.core.command.ShellRunner
 import dev.yoanndev90.statusbarhider.core.log.LogStore
 import dev.yoanndev90.statusbarhider.core.settings.OverlayPrefs
-import dev.yoanndev90.statusbarhider.core.settings.WidgetId
 import dev.yoanndev90.statusbarhider.core.usage.UsageAccess
 import dev.yoanndev90.statusbarhider.core.watcher.SystemUiWatcher
 import dev.yoanndev90.statusbarhider.data.OverlayPrefsRepository
@@ -151,8 +150,7 @@ class StatusBarOverlayService :
 				OverlayBar(
 					prefs = prefs,
 					state = barState,
-					onClockClick = ::onClockClick,
-					onDateClick = ::onDateClick
+					onWidgetClick = ::onWidgetClick
 				)
 			}
 		)
@@ -360,14 +358,9 @@ class StatusBarOverlayService :
 		super.onDestroy()
 	}
 
-	private fun onClockClick() {
+	private fun onWidgetClick(id: String) {
 		if (!prefs.interactive) return
-		BarTapActions.open(this, WidgetId.CLOCK)
-	}
-
-	private fun onDateClick() {
-		if (!prefs.interactive) return
-		BarTapActions.open(this, WidgetId.DATE)
+		BarTapActions.open(this, id)
 	}
 
 	/**

@@ -6,7 +6,6 @@ import android.view.accessibility.AccessibilityEvent
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshotFlow
 import dev.yoanndev90.statusbarhider.core.settings.OverlayPrefs
-import dev.yoanndev90.statusbarhider.core.settings.WidgetId
 import dev.yoanndev90.statusbarhider.data.OverlayPrefsRepository
 import dev.yoanndev90.statusbarhider.overlay.widgets.OverlayBar
 import dev.yoanndev90.statusbarhider.overlay.window.OverlayWindow
@@ -46,8 +45,7 @@ class LockScreenOverlayService : AccessibilityService() {
 					OverlayBar(
 						prefs = prefsState.value,
 						state = SharedBar.barState.value,
-						onClockClick = ::onClockClick,
-						onDateClick = ::onDateClick
+						onWidgetClick = ::onWidgetClick
 					)
 				}
 			)
@@ -74,14 +72,9 @@ class LockScreenOverlayService : AccessibilityService() {
 			!SharedBar.suppressed.value
 	}
 
-	private fun onClockClick() {
+	private fun onWidgetClick(id: String) {
 		if (!prefsState.value.interactive) return
-		BarTapActions.open(this, WidgetId.CLOCK)
-	}
-
-	private fun onDateClick() {
-		if (!prefsState.value.interactive) return
-		BarTapActions.open(this, WidgetId.DATE)
+		BarTapActions.open(this, id)
 	}
 
 	override fun onAccessibilityEvent(event: AccessibilityEvent?) = Unit

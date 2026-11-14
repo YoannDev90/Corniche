@@ -28,8 +28,7 @@ import dev.yoanndev90.statusbarhider.overlay.model.OverlayProgress
 fun OverlayBar(
 	prefs: OverlayPrefs,
 	state: OverlayBarState,
-	onClockClick: () -> Unit,
-	onDateClick: () -> Unit
+	onWidgetClick: (String) -> Unit
 ) {
 	val fg = Color(prefs.textColor())
 	val density = LocalDensity.current
@@ -56,7 +55,7 @@ fun OverlayBar(
 		}
 
 	val cell: @Composable RowScope.(String) -> Unit = { id ->
-		key(id) { WidgetSlot(id, prefs, state, fg, onClockClick, onDateClick) }
+		key(id) { WidgetSlot(id, prefs, state, fg, onWidgetClick) }
 	}
 
 	Box(
@@ -92,12 +91,11 @@ private fun RowScope.WidgetSlot(
 	prefs: OverlayPrefs,
 	state: OverlayBarState,
 	fg: Color,
-	onClockClick: () -> Unit,
-	onDateClick: () -> Unit
+	onWidgetClick: (String) -> Unit
 ) {
 	when (id) {
-		WidgetId.CLOCK -> ClockWidget(prefs, state.screenOn, fg, onClockClick)
-		WidgetId.DATE -> DateWidget(prefs, state.screenOn, fg, onDateClick)
+		WidgetId.CLOCK -> ClockWidget(prefs, state.screenOn, fg) { onWidgetClick(WidgetId.CLOCK) }
+		WidgetId.DATE -> DateWidget(prefs, state.screenOn, fg) { onWidgetClick(WidgetId.DATE) }
 		WidgetId.CALENDAR -> state.calendarText?.let { CalendarWidget(prefs, it, fg) }
 		WidgetId.NOTIFS -> NotifWidget(prefs, state, fg)
 		WidgetId.MEDIA -> state.mediaText?.let { MediaWidget(prefs, it, fg) }
