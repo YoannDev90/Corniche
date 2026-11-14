@@ -28,9 +28,10 @@ updates:
         patterns:
           - "*"
 
-  # No cargo ecosystem here: the Rust tools live in the android-tools/
-  # submodule, a separate repository Dependabot of this repo cannot reach
-  # (the old /tools/logstream entry pointed at a folder that never existed).
+  # No cargo ecosystem here: the Rust tools moved out to their own repository
+  # (the android-tools submodule was removed), so Dependabot of this repo has
+  # nothing cargo-related to update. The old /tools/logstream entry pointed
+  # at a folder that never existed.
 
   - package-ecosystem: pre-commit
     directory: /
