@@ -1,7 +1,5 @@
 package dev.yoanndev90.statusbarhider.tiles
 
-import android.os.Build
-import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 import android.util.Log
 import dev.yoanndev90.statusbarhider.R
@@ -19,9 +17,9 @@ import java.util.concurrent.atomic.AtomicBoolean
 /**
  * Quick Settings tile: hides or restores the system status bar in one tap.
  *
- * Shizuku commands run on a coroutine scope; the tile only touches [Tile] on
- * the main thread. State is refreshed whenever SystemUI asks for listening
- * (panel opened) and after each tap.
+ * Shizuku commands run on a coroutine scope; the tile only touches the
+ * `Tile` it paints on the main thread. State is refreshed whenever
+ * SystemUI asks for listening (panel opened) and after each tap.
  */
 class HideRestoreTile : TileService() {
 	companion object {
@@ -78,13 +76,7 @@ class HideRestoreTile : TileService() {
 	}
 
 	private fun refresh() {
-		val tile = qsTile ?: return
 		val hidden = HideInteractor.observedHidden(this)
-		tile.state = if (hidden) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
-		if (Build.VERSION.SDK_INT >= 29) {
-			tile.subtitle =
-				if (hidden) getString(R.string.tile_tap_to_restore) else getString(R.string.tile_tap_to_hide)
-		}
-		tile.updateTile()
+		refreshTile(hidden, R.string.tile_tap_to_restore, R.string.tile_tap_to_hide)
 	}
 }

@@ -2,9 +2,7 @@ package dev.yoanndev90.statusbarhider.tiles
 
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.provider.Settings
-import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 import dev.yoanndev90.statusbarhider.R
 import dev.yoanndev90.statusbarhider.data.OverlayPrefsRepository
@@ -40,13 +38,7 @@ class CustomBarTile : TileService() {
 	}
 
 	private fun refresh() {
-		val tile = qsTile ?: return
 		val repo = OverlayPrefsRepository.getInstance(this)
-		val enabled = repo.state.value.enabled
-		tile.state = if (enabled) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
-		if (Build.VERSION.SDK_INT >= 29) {
-			tile.subtitle = if (enabled) getString(R.string.tile_tap_to_hide) else getString(R.string.tile_tap_to_show)
-		}
-		tile.updateTile()
+		refreshTile(repo.state.value.enabled, R.string.tile_tap_to_hide, R.string.tile_tap_to_show)
 	}
 }
