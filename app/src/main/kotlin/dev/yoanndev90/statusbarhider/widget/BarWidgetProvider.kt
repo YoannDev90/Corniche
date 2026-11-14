@@ -18,8 +18,9 @@ import dev.yoanndev90.statusbarhider.hide.HideInteractor
  * Home screen widget: two buttons, one per state the labels mirror.
  *
  * Taps dispatch the same [ControlActions] as the external API, and every
- * state change goes through [OverlayController] / [HideInteractor], which
- * call [updateAll] - so the labels never go stale.
+ * state change goes through
+ * [dev.yoanndev90.statusbarhider.overlay.OverlayController] / [HideInteractor],
+ * which call [updateAll] - so the labels never go stale.
  */
 class BarWidgetProvider : AppWidgetProvider() {
 	companion object {
@@ -41,6 +42,9 @@ class BarWidgetProvider : AppWidgetProvider() {
 				.state.value.enabled
 			val systemHidden = HideInteractor.observedHidden(app)
 			return RemoteViews(app.packageName, R.layout.widget_bar).apply {
+				// Request codes 1/2 identify the two PendingIntents: matching
+				// ignores extras, so the token extra alone would not keep the
+				// buttons apart.
 				setTextViewText(
 					R.id.widget_action_bar,
 					app.getString(if (barOn) R.string.action_hide_custom_bar else R.string.action_show_custom_bar)

@@ -11,6 +11,8 @@ import dev.yoanndev90.statusbarhider.R
 import dev.yoanndev90.statusbarhider.core.log.LogStore
 
 private const val TAG = "CustomBar"
+
+/** Id of the ongoing foreground notification; only has to be unique within the app. */
 private const val NOTIF_ID = 1001
 private const val CHANNEL_ID = "overlay"
 

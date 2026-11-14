@@ -37,7 +37,13 @@ import java.util.Locale
 
 private const val TAG = "OverlayBar"
 
-/** Base text size with a relative offset, in sp (e.g. clock = base, date = base - 1). */
+/**
+ * Base text size with a relative offset, in sp (e.g. clock = base, date = base - 1).
+ *
+ * The base is normalized to the slider's 10..20 on load, so this clamp guards
+ * the arithmetic: the -6 secondary line at base 10 would draw at 4sp, which the
+ * floor lifts to 8sp; the 28sp ceiling is headroom no current delta reaches.
+ */
 internal fun OverlayPrefs.textSp(delta: Int = 0): TextUnit = (fontSizeSp + delta).coerceIn(8, 28).sp
 
 internal val OverlayPrefs.fontWeightValue: FontWeight

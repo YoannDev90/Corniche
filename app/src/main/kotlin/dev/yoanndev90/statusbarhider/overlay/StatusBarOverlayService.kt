@@ -74,6 +74,11 @@ class StatusBarOverlayService :
 		private const val REFRESH_DEBOUNCE_MS = 100L
 
 		private const val USB_STATE_ACTION = "android.hardware.usb.action.USB_STATE"
+
+		/**
+		 * Delay before the first apply after unlock: 0 = right away. The
+		 * timing that has to be right lives in [REAPPLY_WATCH_OFFSETS_MS].
+		 */
 		private const val REAPPLY_AFTER_UNLOCK_MS = 0L
 
 		/**
