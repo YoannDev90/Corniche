@@ -15,7 +15,6 @@
 | `mise run install-debug`  | Build + install debug APK        |
 | `mise run clean`          | Clean Gradle outputs             |
 | `mise run devices`        | List connected ADB devices       |
-| `mise run logs`           | Live log TUI (logstream)         |
 | `mise run uninstall`      | Uninstall the app from device    |
 | `mise run setup-hooks`    | Install git hooks (pre-commit + commit-msg) |
 
