@@ -18,11 +18,13 @@ import dev.yoanndev90.statusbarhider.overlay.model.OverlayBarState
 internal fun NotifWidget(
 	prefs: OverlayPrefs,
 	state: OverlayBarState,
-	fg: Color
+	fg: Color,
+	onClick: () -> Unit
 ) {
 	if (!prefs.showNotifs || !state.notifsEnabled || state.notifs.isEmpty()) return
 	val icons = state.notifs.take(prefs.maxNotifs.coerceIn(1, 8))
 	Row(
+		modifier = Modifier.barClickable(prefs, onClick),
 		verticalAlignment = Alignment.CenterVertically,
 		horizontalArrangement = Arrangement.spacedBy(3.dp)
 	) {

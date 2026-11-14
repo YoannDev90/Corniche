@@ -113,14 +113,18 @@ private fun RowScope.WidgetSlot(
 	when (id) {
 		WidgetId.CLOCK -> ClockWidget(prefs, state.screenOn, fg) { onWidgetClick(WidgetId.CLOCK) }
 		WidgetId.DATE -> DateWidget(prefs, state.screenOn, fg) { onWidgetClick(WidgetId.DATE) }
-		WidgetId.CALENDAR -> state.calendarText?.let { CalendarWidget(prefs, it, fg) }
-		WidgetId.NOTIFS -> NotifWidget(prefs, state, fg)
-		WidgetId.MEDIA -> state.mediaText?.let { MediaWidget(prefs, it, fg) }
+		WidgetId.CALENDAR ->
+			state.calendarText?.let { CalendarWidget(prefs, it, fg) { onWidgetClick(WidgetId.CALENDAR) } }
+		WidgetId.NOTIFS -> NotifWidget(prefs, state, fg) { onWidgetClick(WidgetId.NOTIFS) }
+		WidgetId.MEDIA ->
+			state.mediaText?.let { MediaWidget(prefs, it, fg) { onWidgetClick(WidgetId.MEDIA) } }
 		WidgetId.SPACER -> Spacer(Modifier.weight(1f))
-		WidgetId.CONNECTIVITY -> ConnectivityWidget(prefs, state, fg)
-		WidgetId.BATTERY -> BatteryWidget(prefs, state, fg)
-		WidgetId.ALARM -> state.alarmText?.let { AlarmWidget(prefs, it, fg) }
-		WidgetId.BANDWIDTH -> BandwidthWidget(prefs, state, fg)
+		WidgetId.CONNECTIVITY ->
+			ConnectivityWidget(prefs, state, fg) { onWidgetClick(WidgetId.CONNECTIVITY) }
+		WidgetId.BATTERY -> BatteryWidget(prefs, state, fg) { onWidgetClick(WidgetId.BATTERY) }
+		WidgetId.ALARM ->
+			state.alarmText?.let { AlarmWidget(prefs, it, fg) { onWidgetClick(WidgetId.ALARM) } }
+		WidgetId.BANDWIDTH -> BandwidthWidget(prefs, state, fg) { onWidgetClick(WidgetId.BANDWIDTH) }
 	}
 }
 

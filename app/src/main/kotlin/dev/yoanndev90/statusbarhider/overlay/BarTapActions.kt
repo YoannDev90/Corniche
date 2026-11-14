@@ -1,9 +1,12 @@
 package dev.yoanndev90.statusbarhider.overlay
 
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.media.session.MediaSessionManager
 import android.net.Uri
 import android.provider.AlarmClock
+import android.provider.Settings
 import android.util.Log
 import dev.yoanndev90.statusbarhider.core.command.ShellRunner
 import dev.yoanndev90.statusbarhider.core.log.LogStore
@@ -13,7 +16,8 @@ import dev.yoanndev90.statusbarhider.overlay.system.runSafely
 /**
  * Tap targets of the custom bar widgets, shared by both overlay services
  * (status bar, lock screen) so the intent plumbing lives in one place.
- * Unknown ids are ignored: a widget without a target simply does nothing.
+ * Ids without a target - the spacer above all - are ignored: a widget
+ * nobody wired up simply does nothing.
  */
 internal object BarTapActions {
 	private const val TAG = "BarTapActions"
@@ -22,11 +26,19 @@ internal object BarTapActions {
 	private const val EXPAND_NOTIFICATIONS = "cmd statusbar expand-notifications"
 	private const val EXPAND_TIMEOUT_SEC = 5L
 
-	/** Opens whatever the widget [id] stands for. */
-	fun open(context: Context, id: String) {
+	/**
+	 * Opens whatever the widget [id] stands for. Suspends only for
+	 * [WidgetId.NOTIFS], which asks SystemUI for the panel through the shell.
+	 */
+	suspend fun open(context: Context, id: String) {
 		when (id) {
-			WidgetId.CLOCK -> openClock(context)
-			WidgetId.DATE -> openDate(context)
+			WidgetId.CLOCK, WidgetId.ALARM -> openAction(context, AlarmClock.ACTION_SHOW_ALARMS)
+			WidgetId.DATE, WidgetId.CALENDAR -> openDate(context)
+			WidgetId.NOTIFS -> expandNotifications(context)
+			WidgetId.BATTERY -> openAction(context, Intent.ACTION_POWER_USAGE_SUMMARY)
+			WidgetId.BANDWIDTH -> openAction(context, Settings.ACTION_DATA_USAGE_SETTINGS)
+			WidgetId.CONNECTIVITY -> openAction(context, Settings.ACTION_WIFI_SETTINGS)
+			WidgetId.MEDIA -> openMedia(context)
 			else -> Unit
 		}
 	}
@@ -47,12 +59,10 @@ internal object BarTapActions {
 		LogStore.appendOnce(context, "expand-notifications#${result.exit}", "ERROR: $line")
 	}
 
-	private fun openClock(context: Context) {
+	/** Fire one settings intent; an activity that answers it is all we ask. */
+	private fun openAction(context: Context, action: String) {
 		runSafely(context) {
-			context.startActivity(
-				Intent(AlarmClock.ACTION_SHOW_ALARMS)
-					.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-			)
+			context.startActivity(Intent(action).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
 		}
 	}
 
@@ -75,6 +85,24 @@ internal object BarTapActions {
 					Log.w(TAG, "open calendar", e)
 				}
 			}
+		}
+	}
+
+	/**
+	 * The app behind the now-playing widget: the first active media session,
+	 * which is the one the widget draws. Reading the sessions needs notification
+	 * access - the same grant the widget itself needs - so without it there is
+	 * nothing to open and nothing to report.
+	 */
+	private fun openMedia(context: Context) {
+		runSafely(context) {
+			val manager =
+				context.getSystemService(MediaSessionManager::class.java) ?: return@runSafely
+			val listener = ComponentName(context, NotifListenerService::class.java)
+			val pkg =
+				manager.getActiveSessions(listener).firstOrNull()?.packageName ?: return@runSafely
+			val launch = context.packageManager.getLaunchIntentForPackage(pkg) ?: return@runSafely
+			context.startActivity(launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
 		}
 	}
 }

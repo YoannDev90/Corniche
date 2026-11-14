@@ -26,7 +26,8 @@ import dev.yoanndev90.statusbarhider.overlay.model.OverlaySpeed
 internal fun BandwidthWidget(
 	prefs: OverlayPrefs,
 	state: OverlayBarState,
-	fg: Color
+	fg: Color,
+	onClick: () -> Unit
 ) {
 	val rx = state.bandwidthRx ?: return
 	if (!prefs.showBandwidth) return
@@ -44,7 +45,10 @@ internal fun BandwidthWidget(
 		)
 	// Measured once per typography change, never per sample, so the slot is constant.
 	val slotWidth = speedSlotWidth(valueStyle)
-	Row(verticalAlignment = Alignment.CenterVertically) {
+	Row(
+		modifier = Modifier.barClickable(prefs, onClick),
+		verticalAlignment = Alignment.CenterVertically
+	) {
 		if (prefs.bandwidthMerged) {
 			IconImage(R.drawable.ic_swap, stringResource(R.string.cd_bandwidth), fg, 14)
 			SpeedColumn(rx, valueStyle, unitStyle, fg, slotWidth)

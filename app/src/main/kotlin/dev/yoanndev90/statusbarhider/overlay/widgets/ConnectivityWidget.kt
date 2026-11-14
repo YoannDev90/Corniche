@@ -70,11 +70,13 @@ private fun connectivityIndicators(prefs: OverlayPrefs, state: OverlayBarState):
 internal fun ConnectivityWidget(
 	prefs: OverlayPrefs,
 	state: OverlayBarState,
-	fg: Color
+	fg: Color,
+	onClick: () -> Unit
 ) {
 	val visible = connectivityIndicators(prefs, state).filter { it.isVisible(airplaneOff = !state.airplane) }
 	if (visible.isEmpty()) return
 	Row(
+		modifier = Modifier.barClickable(prefs, onClick),
 		verticalAlignment = Alignment.CenterVertically,
 		horizontalArrangement = Arrangement.spacedBy(2.dp)
 	) {

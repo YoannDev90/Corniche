@@ -1,6 +1,7 @@
 package dev.yoanndev90.statusbarhider.overlay.widgets
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import dev.yoanndev90.statusbarhider.R
@@ -10,9 +11,11 @@ import dev.yoanndev90.statusbarhider.core.settings.OverlayPrefs
 internal fun CalendarWidget(
 	prefs: OverlayPrefs,
 	text: String,
-	fg: Color
+	fg: Color,
+	onClick: () -> Unit
 ) {
 	LabeledIcon(
+		modifier = Modifier.barClickable(prefs, onClick),
 		iconRes = R.drawable.ic_calendar,
 		iconDesc = stringResource(R.string.cd_next_event),
 		text = text,
@@ -27,9 +30,11 @@ internal fun CalendarWidget(
 internal fun MediaWidget(
 	prefs: OverlayPrefs,
 	text: String,
-	fg: Color
+	fg: Color,
+	onClick: () -> Unit
 ) {
 	LabeledIcon(
+		modifier = Modifier.barClickable(prefs, onClick),
 		iconRes = R.drawable.ic_media,
 		iconDesc = stringResource(R.string.cd_now_playing),
 		text = text,
@@ -45,9 +50,11 @@ internal fun MediaWidget(
 internal fun AlarmWidget(
 	prefs: OverlayPrefs,
 	text: String,
-	fg: Color
+	fg: Color,
+	onClick: () -> Unit
 ) {
 	LabeledIcon(
+		modifier = Modifier.barClickable(prefs, onClick),
 		iconRes = R.drawable.ic_alarm,
 		iconDesc = stringResource(R.string.cd_next_alarm),
 		text = text,

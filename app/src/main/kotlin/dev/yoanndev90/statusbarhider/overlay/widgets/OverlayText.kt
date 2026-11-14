@@ -2,7 +2,6 @@ package dev.yoanndev90.statusbarhider.overlay.widgets
 
 import android.util.Log
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -121,10 +120,7 @@ internal fun WidgetText(
 		style = if (numeric) tnum else LocalTextStyle.current,
 		maxLines = 1,
 		overflow = TextOverflow.Ellipsis,
-		modifier =
-			Modifier.then(
-				if (prefs.interactive) Modifier.clickable(onClick = onClick) else Modifier
-			)
+		modifier = Modifier.barClickable(prefs, onClick)
 	)
 }
 
@@ -145,6 +141,7 @@ internal fun IconImage(
 
 @Composable
 internal fun LabeledIcon(
+	modifier: Modifier = Modifier,
 	iconRes: Int,
 	iconDesc: String,
 	text: String,
@@ -154,7 +151,7 @@ internal fun LabeledIcon(
 	maxWidthDp: Int? = null,
 	startPadDp: Int = 4
 ) {
-	Row(verticalAlignment = Alignment.CenterVertically) {
+	Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
 		IconImage(iconRes, iconDesc, fg, 14)
 		Text(
 			text = text,

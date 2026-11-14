@@ -15,10 +15,14 @@ import dev.yoanndev90.statusbarhider.overlay.model.OverlayBarState
 internal fun BatteryWidget(
 	prefs: OverlayPrefs,
 	state: OverlayBarState,
-	fg: Color
+	fg: Color,
+	onClick: () -> Unit
 ) {
 	if (!prefs.showBattery && !prefs.showBatteryIcon) return
-	Row(verticalAlignment = Alignment.CenterVertically) {
+	Row(
+		modifier = Modifier.barClickable(prefs, onClick),
+		verticalAlignment = Alignment.CenterVertically
+	) {
 		if (prefs.showBatteryIcon) {
 			BatteryIcon(
 				level = state.batteryPct.coerceAtLeast(0),

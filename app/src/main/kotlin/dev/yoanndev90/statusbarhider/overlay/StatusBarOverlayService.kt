@@ -360,7 +360,7 @@ class StatusBarOverlayService :
 
 	private fun onWidgetClick(id: String) {
 		if (!prefs.interactive) return
-		BarTapActions.open(this, id)
+		serviceScope.launch { BarTapActions.open(this@StatusBarOverlayService, id) }
 	}
 
 	/**
