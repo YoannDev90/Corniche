@@ -68,6 +68,10 @@ run = "./gradlew clean"
 description = "List connected ADB devices"
 run = "adb devices"
 
+[tasks.perms]
+description = "Grant permissions through ADB"
+run = "./scripts/grant_perms.sh"
+
 [tasks.uninstall]
 description = "Uninstall the app from device"
 run = "adb uninstall dev.yoanndev90.statusbarhider"
