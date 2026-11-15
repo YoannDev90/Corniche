@@ -1,5 +1,6 @@
 package dev.yoanndev90.statusbarhider.overlay
 
+import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -56,7 +57,17 @@ internal object BarTapActions {
 			Target.CALENDAR -> openDate(context)
 			Target.NOTIFICATIONS -> expandNotifications(context)
 			Target.BATTERY -> openAction(context, Intent.ACTION_POWER_USAGE_SUMMARY)
-			Target.DATA_USAGE -> openAction(context, Settings.ACTION_DATA_USAGE_SETTINGS)
+			// HyperOS ships no handler for the AOSP action (verified on device:
+			// ActivityNotFoundException) and its data-usage screen sits behind
+			// the MIUI network-assistant actions; ENTRANCE opens the real
+			// "Data usage" page, SETTINGS is the older-MIUI fallback.
+			Target.DATA_USAGE ->
+				openAction(
+					context,
+					Settings.ACTION_DATA_USAGE_SETTINGS,
+					"miui.intent.action.NETWORKASSISTANT_ENTRANCE",
+					"miui.intent.action.NETWORKASSISTANT_SETTINGS"
+				)
 			Target.WIFI -> openAction(context, Settings.ACTION_WIFI_SETTINGS)
 			Target.MEDIA -> openMedia(context)
 			null -> Unit
@@ -79,10 +90,24 @@ internal object BarTapActions {
 		LogStore.appendOnce(context, "expand-notifications#${result.exit}", "ERROR: $line")
 	}
 
-	/** Fire one settings intent; an activity that answers it is all we ask. */
-	private fun openAction(context: Context, action: String) {
+	/**
+	 * Fire the first settings intent this firmware actually answers: some
+	 * OEMs (HyperOS) drop the AOSP action entirely, so a single intent would
+	 * land in the swallow-and-log path with the screen never opening. An
+	 * unresolvable intent moves to the next candidate; anything else (a real
+	 * platform error) propagates to [runSafely] as before.
+	 */
+	private fun openAction(context: Context, vararg actions: String) {
 		runSafely(context) {
-			context.startActivity(Intent(action).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+			for (action in actions) {
+				try {
+					context.startActivity(Intent(action).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+					return@runSafely
+				} catch (_: ActivityNotFoundException) {
+					// No handler here; the next candidate may have one.
+				}
+			}
+			Log.w(TAG, "no handler for ${actions.joinToString()}")
 		}
 	}
 
