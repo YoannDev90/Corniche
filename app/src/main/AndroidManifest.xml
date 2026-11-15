@@ -4,6 +4,11 @@
 
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <!-- Clock/alarm widget tap: SHOW_ALARMS is guarded by this permission, so
+         without it the clock-app launch is refused with a SecurityException on
+         first tap (seen on HyperOS). Normal level: granted at install, no
+         dialog, no Play policy restriction. -->
+    <uses-permission android:name="com.android.alarm.permission.SET_ALARM" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <!-- Lets ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS show the direct "let
