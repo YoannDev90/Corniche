@@ -3,7 +3,9 @@ package dev.yoanndev90.statusbarhider.overlay
 import android.accessibilityservice.AccessibilityService
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import dev.yoanndev90.statusbarhider.core.settings.OverlayPrefs
 import dev.yoanndev90.statusbarhider.data.OverlayPrefsRepository
@@ -18,14 +20,19 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
 /**
- * Second window for the custom status bar, hosted as a
- * [WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY] (window layer 31):
- * the window policy hides TYPE_APPLICATION_OVERLAY windows behind the keyguard
- * (mPolicyVisibility=false), but layer 31 sits above the NotificationShade,
- * which is what sameerasw/essentials does for its lock-screen bar.
+ * Hosts the bar window as a [WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY]
+ * (window layer 31) whenever this service is enabled:
  *
- * Renders only while the keyguard is up; the regular overlay keeps handling
- * the unlocked case (and everything else the bar does).
+ * - the window policy hides TYPE_APPLICATION_OVERLAY windows behind the keyguard
+ *   (mPolicyVisibility=false), but layer 31 sits above the NotificationShade,
+ *   which is what sameerasw/essentials does for its lock-screen bar;
+ * - layer 31 also sits above the system StatusBar window, whose touch region
+ *   (the top ~94px) would otherwise swallow taps meant for the widgets drawn
+ *   there - only a bound accessibility service may open such a window.
+ *
+ * While bound, this service owns the only bar window and [StatusBarOverlayService]
+ * keeps publishing state (indicators, prefs, suppression) with its own window
+ * down; with the service off, the regular overlay is the bar again.
  */
 class LockScreenOverlayService : AccessibilityService() {
 	/** Lazy: the base Context only exists after Service.attach(), unlike during construction. */
@@ -33,6 +40,7 @@ class LockScreenOverlayService : AccessibilityService() {
 	private val prefsState = mutableStateOf(OverlayPrefs())
 	private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 	private var window: OverlayWindow? = null
+	private var barState by SharedBar.barState
 
 	override fun onServiceConnected() {
 		super.onServiceConnected()
@@ -50,6 +58,10 @@ class LockScreenOverlayService : AccessibilityService() {
 				}
 			)
 		window = w
+		// This window is the one on screen: the burn-in shift has to move it,
+		// and the regular service must stand its own window down.
+		SharedBar.shiftBurnIn = { w.shiftForBurnIn() }
+		SharedBar.a11yHost.value = true
 		scope.launch { prefsRepo.state.collect { prefsState.value = it } }
 		scope.launch {
 			snapshotFlow { shouldAttach() }
@@ -61,15 +73,26 @@ class LockScreenOverlayService : AccessibilityService() {
 				.distinctUntilChanged()
 				.collect { w.setRenderingActive(it) }
 		}
+		scope.launch {
+			w.cameraGeometry.collect { geometry ->
+				if (w.view != null && geometry != barState.camera) barState = barState.copy(camera = geometry)
+			}
+		}
 	}
 
+	/**
+	 * The regular service's rule - the bar is up unless a blacklisted app is
+	 * in front, or the keyguard is up with the lock-screen toggle off - plus
+	 * the shade: this window draws above the NotificationShade, so while the
+	 * shade is expanded (and the keyguard is not) it must go, or it would
+	 * cover the shade and eat its taps.
+	 */
 	private fun shouldAttach(): Boolean {
 		val s = SharedBar.barState.value
 		return prefsState.value.enabled &&
-			prefsState.value.showOnLockScreen &&
-			s.locked &&
-			s.screenOn &&
-			!SharedBar.suppressed.value
+			!SharedBar.suppressed.value &&
+			!(s.locked && !prefsState.value.showOnLockScreen) &&
+			(s.locked || !SharedBar.shadeOpen.value)
 	}
 
 	private fun onWidgetClick(id: String) {
@@ -77,7 +100,13 @@ class LockScreenOverlayService : AccessibilityService() {
 		scope.launch { BarTapActions.open(this@LockScreenOverlayService, id) }
 	}
 
-	override fun onAccessibilityEvent(event: AccessibilityEvent?) = Unit
+	override fun onAccessibilityEvent(event: AccessibilityEvent?) {
+		if (event?.eventType != AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) return
+		// A SystemUI window - the shade, a volume panel - became the active one:
+		// the bar steps aside. Anything else becoming active means the shade is
+		// gone and the bar can come back.
+		SharedBar.shadeOpen.value = event.packageName?.toString() == "com.android.systemui"
+	}
 
 	override fun onInterrupt() = Unit
 
@@ -85,6 +114,8 @@ class LockScreenOverlayService : AccessibilityService() {
 		scope.cancel()
 		window?.detach()
 		window = null
+		SharedBar.shiftBurnIn = null
+		SharedBar.a11yHost.value = false
 		super.onDestroy()
 	}
 }

@@ -136,7 +136,7 @@
     <string name="perm_post_notifs">Post notifications</string>
     <string name="perm_bluetooth">Bluetooth devices</string>
     <string name="perm_usage">Usage access</string>
-    <string name="perm_accessibility">Accessibility (lock screen)</string>
+    <string name="perm_accessibility">Accessibility (bar &amp; lock screen)</string>
     <string name="perm_battery_opt">Battery optimization</string>
 
     <!-- About -->
@@ -156,10 +156,10 @@
     <string name="action_restore">Restore (undo)</string>
     <string name="action_set">Set</string>
     <string name="action_enable_notification_access">Enable notification access</string>
-    <string name="action_enable_lock_overlay">Enable lock-screen overlay (accessibility)</string>
-    <string name="action_disable_lock_overlay">Disable lock-screen overlay (accessibility)</string>
-    <string name="a11y_lock_service_label">Lock-screen overlay for the custom status bar</string>
-    <string name="a11y_lock_service_desc">Hosts the custom status bar above the lock screen. It draws no content outside the keyguard and never reads your screen.</string>
+    <string name="action_enable_lock_overlay">Enable accessibility service (lock screen + taps)</string>
+    <string name="action_disable_lock_overlay">Disable accessibility service</string>
+    <string name="a11y_lock_service_label">Custom status bar overlay</string>
+    <string name="a11y_lock_service_desc">Hosts the custom status bar above other apps and the lock screen so taps reach its widgets. It draws only the bar and never reads your screen.</string>
     <string name="action_export_logs">Export logs</string>
     <string name="action_share_logs">Share logs as file</string>
     <string name="action_redetect_oem">Re-detect OEM</string>
@@ -200,7 +200,7 @@
     <string name="setup_post_notifs">Notifications (foreground service)</string>
     <string name="setup_bluetooth">Bluetooth devices (per-device icons)</string>
     <string name="setup_usage">Usage access (app blacklist, optional)</string>
-    <string name="setup_accessibility">Accessibility (lock screen overlay)</string>
+    <string name="setup_accessibility">Accessibility (bar &amp; lock screen)</string>
     <string name="setup_group_keepalive">Keep alive</string>
     <string name="setup_keepalive_hint">These screens decide whether the app may keep running once the screen is off. If the bar disappears on its own, work through them.</string>
     <string name="setup_battery_opt">Battery optimization exemption</string>
@@ -236,7 +236,7 @@
     <string name="switch_bandwidth_sub">Polled every second</string>
     <string name="switch_merged_speed">Merged up/down speed</string>
     <string name="switch_touchable_bar">Touchable bar</string>
-    <string name="switch_touchable_bar_sub">Tap widgets to open them; swipe down from the bar opens notifications</string>
+    <string name="switch_touchable_bar_sub">Tap widgets to open them; swipe down from the bar opens notifications. The accessibility service makes the whole bar tappable</string>
     <string name="switch_dark_text">Dark text</string>
     <string name="switch_dark_text_sub">For a transparent bar</string>
     <string name="switch_use_24h">24-hour clock</string>

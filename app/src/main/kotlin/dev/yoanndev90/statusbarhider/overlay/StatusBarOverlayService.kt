@@ -18,6 +18,7 @@ import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import dev.yoanndev90.statusbarhider.core.command.ShellRunner
 import dev.yoanndev90.statusbarhider.core.log.LogStore
 import dev.yoanndev90.statusbarhider.core.settings.OverlayPrefs
@@ -51,6 +52,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.concurrent.ConcurrentHashMap
@@ -246,7 +248,7 @@ class StatusBarOverlayService :
 
 	override suspend fun refreshSuppressed() = updateSuppressed()
 
-	override suspend fun shiftForBurnIn() = window.shiftForBurnIn()
+	override suspend fun shiftForBurnIn() = SharedBar.shiftBurnIn?.invoke() ?: window.shiftForBurnIn()
 
 	override fun onUsageAccessMissing() {
 		Log.w(TAG, "Usage access not granted - app blacklist inactive")
@@ -294,8 +296,17 @@ class StatusBarOverlayService :
 		}
 		serviceScope.launch {
 			window.cameraGeometry.collect { geometry ->
-				if (geometry != barState.camera) barState = barState.copy(camera = geometry)
+				// Only the window that is actually attached publishes geometry:
+				// while the accessibility service hosts the bar this one is down
+				// and its stale value must not overwrite the hosted window's.
+				if (window.view != null && geometry != barState.camera) barState = barState.copy(camera = geometry)
 			}
+		}
+		serviceScope.launch {
+			// The accessibility service takes the window over (or gives it back).
+			snapshotFlow { SharedBar.a11yHost.value }
+				.distinctUntilChanged()
+				.collect { syncWindowAttachment() }
 		}
 		poller.schedulePoll()
 		poller.scheduleBandwidth()
@@ -505,14 +516,18 @@ class StatusBarOverlayService :
 	}
 
 	/**
-	 * Single source of truth for the window's existence. It goes away when a
+	 * Single source of truth for the bar's existence. It goes away when a
 	 * blacklisted app is in front, or while the keyguard is up and the lock
 	 * screen toggle is off — the latter tears the surface down instead of
 	 * composing a bar the keyguard would cover anyway.
+	 *
+	 * With the accessibility service bound it hosts the only window (two bars
+	 * would stack, and only its window sits above the system StatusBar), so
+	 * this service then publishes state and keeps its own window down.
 	 */
 	private fun syncWindowAttachment() {
 		val show = !suppressed && !(barState.locked && !prefs.showOnLockScreen)
-		window.sync(show)
+		window.sync(show && !SharedBar.a11yHost.value)
 		// Published right where the window is decided, so the flag a screen
 		// reads cannot drift from the bar that is actually on screen.
 		_visible.value = show

@@ -190,7 +190,8 @@
                 android:value="Custom status bar overlay replacing the hidden system bar" />
         </service>
 
-        <!-- Lock-screen window: TYPE_ACCESSIBILITY_OVERLAY, above the keyguard. -->
+        <!-- Bar window host: TYPE_ACCESSIBILITY_OVERLAY, above the system
+             StatusBar (so taps reach the widgets) and the keyguard. -->
         <service
             android:name="dev.yoanndev90.statusbarhider.overlay.LockScreenOverlayService"
             android:enabled="true"
