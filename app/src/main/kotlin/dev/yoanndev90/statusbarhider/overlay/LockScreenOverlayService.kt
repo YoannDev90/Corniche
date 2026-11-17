@@ -97,7 +97,8 @@ class LockScreenOverlayService : AccessibilityService() {
 
 	private fun onWidgetClick(id: String) {
 		if (!prefsState.value.interactive) return
-		scope.launch { BarTapActions.open(this@LockScreenOverlayService, id) }
+		val overrides = prefsState.value.tapActions
+		scope.launch { BarTapActions.open(this@LockScreenOverlayService, id, overrides) }
 	}
 
 	override fun onAccessibilityEvent(event: AccessibilityEvent?) {

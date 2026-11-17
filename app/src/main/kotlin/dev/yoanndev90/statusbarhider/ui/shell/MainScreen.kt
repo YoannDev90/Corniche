@@ -50,6 +50,7 @@ import dev.yoanndev90.statusbarhider.core.settings.sections.HiddenAppsSection
 import dev.yoanndev90.statusbarhider.core.settings.sections.LockAppearanceSection
 import dev.yoanndev90.statusbarhider.core.settings.sections.LockBehaviorSection
 import dev.yoanndev90.statusbarhider.core.settings.sections.NotificationSection
+import dev.yoanndev90.statusbarhider.core.settings.sections.TapSection
 import dev.yoanndev90.statusbarhider.data.AppFlagsStore
 import dev.yoanndev90.statusbarhider.ui.components.SettingSectionScreen
 import dev.yoanndev90.statusbarhider.ui.screens.home.HomeScreen
@@ -283,6 +284,7 @@ private fun AppNavHost(
 		composable(Routes.HOME) { HomeScreen(statusViewModel, navController::navigate) }
 		composable(Routes.SETTINGS) { SettingsRootScreen(statusViewModel, settingsQuery, navController::navigate) }
 		composable(Routes.GENERAL) { SettingSectionScreen(statusViewModel, GeneralSection) }
+		composable(Routes.TAPS) { SettingSectionScreen(statusViewModel, TapSection) }
 		composable(Routes.APPEARANCE) { SettingSectionScreen(statusViewModel, AppearanceSection) }
 		composable(Routes.CUTOUT) { SettingSectionScreen(statusViewModel, CutoutSection) }
 		composable(Routes.CLOCK) { SettingSectionScreen(statusViewModel, ClockSection) }

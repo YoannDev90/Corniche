@@ -56,6 +56,7 @@ private const val KEY_SHOW_BATTERY_ICON = "show_battery_icon"
 private const val KEY_SHOW_NOTIFS = "show_notifs"
 private const val KEY_MAX_NOTIFS = "max_notifs"
 private const val KEY_WIDGET_ORDER = "widget_order"
+private const val KEY_TAP_ACTIONS = "tap_actions"
 private const val KEY_BURN_IN_MIN = "burn_in_min"
 private const val KEY_INTERACTIVE = "interactive"
 private const val KEY_SHOW_NFC = "show_nfc"
@@ -103,6 +104,30 @@ enum class LockScreenMode {
 
 	/** Clock widget only: nothing else is drawn above the keyguard. */
 	CLOCK_ONLY
+}
+
+/**
+ * What a tap on a bar widget can do: the seven default targets plus system
+ * shortcuts. [NONE] is "do nothing" — a widget kept on the bar but disarmed.
+ * Serializes by name, so the JSON keeps "CLOCK"/"SCREENSHOT".
+ */
+@Serializable
+enum class TapAction {
+	/** No action: the tap is swallowed (widget stays visible). */
+	NONE,
+	CLOCK,
+	CALENDAR,
+	NOTIFICATIONS,
+	BATTERY,
+	DATA_USAGE,
+	WIFI,
+	MEDIA,
+	LOCK_SCREEN,
+	SCREENSHOT,
+	AUTO_ROTATE,
+	DND,
+	PLAY_PAUSE,
+	TORCH
 }
 
 /**
@@ -183,6 +208,12 @@ data class OverlayPrefs(
 	val burnInMin: Int = 5,
 	@SerialName(KEY_INTERACTIVE)
 	val interactive: Boolean = false,
+	/**
+	 * Per-widget tap overrides; an absent id keeps the built-in default, so
+	 * future default changes never break stored data.
+	 */
+	@SerialName(KEY_TAP_ACTIONS)
+	val tapActions: Map<String, TapAction> = emptyMap(),
 	@SerialName(KEY_SHOW_ON_LOCK_SCREEN)
 	val showOnLockScreen: Boolean = true,
 	@SerialName(KEY_LOCK_SCREEN_MODE)

@@ -371,7 +371,8 @@ class StatusBarOverlayService :
 
 	private fun onWidgetClick(id: String) {
 		if (!prefs.interactive) return
-		serviceScope.launch { BarTapActions.open(this@StatusBarOverlayService, id) }
+		val overrides = prefs.tapActions
+		serviceScope.launch { BarTapActions.open(this@StatusBarOverlayService, id, overrides) }
 	}
 
 	/**

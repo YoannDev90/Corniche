@@ -20,6 +20,7 @@ import dev.yoanndev90.statusbarhider.core.settings.sections.LogsSection
 import dev.yoanndev90.statusbarhider.core.settings.sections.NotificationSection
 import dev.yoanndev90.statusbarhider.core.settings.sections.OemSection
 import dev.yoanndev90.statusbarhider.core.settings.sections.ProfilesSection
+import dev.yoanndev90.statusbarhider.core.settings.sections.TapSection
 import dev.yoanndev90.statusbarhider.core.settings.specs.OverlaySpecs
 
 /**
@@ -43,6 +44,7 @@ object SettingsRegistry {
 	val sections: List<SettingSection<OverlayPrefs>> =
 		listOf(
 			GeneralSection,
+			TapSection,
 			AppearanceSection,
 			CutoutSection,
 			ClockSection,

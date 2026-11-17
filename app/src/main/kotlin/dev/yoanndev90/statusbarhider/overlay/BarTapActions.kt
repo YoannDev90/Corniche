@@ -4,6 +4,8 @@ import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.hardware.camera2.CameraCharacteristics
+import android.hardware.camera2.CameraManager
 import android.media.session.MediaSessionManager
 import android.net.Uri
 import android.provider.AlarmClock
@@ -11,66 +13,90 @@ import android.provider.Settings
 import android.util.Log
 import dev.yoanndev90.statusbarhider.core.command.ShellRunner
 import dev.yoanndev90.statusbarhider.core.log.LogStore
+import dev.yoanndev90.statusbarhider.core.settings.TapAction
 import dev.yoanndev90.statusbarhider.core.settings.WidgetId
 import dev.yoanndev90.statusbarhider.overlay.system.runSafely
 
 /**
- * Tap targets of the custom bar widgets, shared by both overlay services
+ * Tap actions of the custom bar widgets, shared by both overlay services
  * (status bar, lock screen) so the intent plumbing lives in one place.
- * Ids without a target - the spacer above all - are ignored: a widget
- * nobody wired up simply does nothing.
+ *
+ * Each widget has a built-in default ([defaultOf]) which the user can
+ * override per widget through [OverlayPrefs.tapActions]; an unknown id -
+ * the spacer above all - resolves to nothing and the tap is ignored.
  */
 internal object BarTapActions {
 	private const val TAG = "BarTapActions"
 
 	/** One-shot command; a pull-down must never wait on a queued sequence. */
 	private const val EXPAND_NOTIFICATIONS = "cmd statusbar expand-notifications"
-	private const val EXPAND_TIMEOUT_SEC = 5L
-
-	/** Where the tap on a widget leads; the whole dispatch table lives here. */
-	internal enum class Target { CLOCK, CALENDAR, NOTIFICATIONS, BATTERY, DATA_USAGE, WIFI, MEDIA }
+	private const val CMD_TIMEOUT_SEC = 5L
 
 	/**
-	 * The target of [id], or null for a widget with none (the spacer, and any
-	 * id a future version adds before wiring it). Kept separate from [open] so
-	 * the table can be asserted without an Android runtime.
+	 * The built-in target of [id], or null for a widget with none (the
+	 * spacer, and any id a future version adds before wiring it). Kept
+	 * separate from [open] so the table can be asserted without an Android
+	 * runtime.
 	 */
-	internal fun targetOf(id: String): Target? =
+	internal fun defaultOf(id: String): TapAction? =
 		when (id) {
-			WidgetId.CLOCK, WidgetId.ALARM -> Target.CLOCK
-			WidgetId.DATE, WidgetId.CALENDAR -> Target.CALENDAR
-			WidgetId.NOTIFS -> Target.NOTIFICATIONS
-			WidgetId.BATTERY -> Target.BATTERY
-			WidgetId.BANDWIDTH -> Target.DATA_USAGE
-			WidgetId.CONNECTIVITY -> Target.WIFI
-			WidgetId.MEDIA -> Target.MEDIA
+			WidgetId.CLOCK, WidgetId.ALARM -> TapAction.CLOCK
+			WidgetId.DATE, WidgetId.CALENDAR -> TapAction.CALENDAR
+			WidgetId.NOTIFS -> TapAction.NOTIFICATIONS
+			WidgetId.BATTERY -> TapAction.BATTERY
+			WidgetId.BANDWIDTH -> TapAction.DATA_USAGE
+			WidgetId.CONNECTIVITY -> TapAction.WIFI
+			WidgetId.MEDIA -> TapAction.MEDIA
 			else -> null
 		}
 
 	/**
-	 * Opens whatever the widget [id] stands for. Suspends only for
-	 * [WidgetId.NOTIFS], which asks SystemUI for the panel through the shell.
+	 * What a tap on [id] actually does: the user's override when one is
+	 * stored, the built-in default otherwise. An absent key deliberately
+	 * means "default" rather than NONE, so changing a default later never
+	 * breaks data saved before the change; an id with no default at all
+	 * (the spacer) stays inert whatever the map holds.
 	 */
-	suspend fun open(context: Context, id: String) {
-		when (targetOf(id)) {
-			Target.CLOCK -> openAction(context, AlarmClock.ACTION_SHOW_ALARMS)
-			Target.CALENDAR -> openDate(context)
-			Target.NOTIFICATIONS -> expandNotifications(context)
-			Target.BATTERY -> openAction(context, Intent.ACTION_POWER_USAGE_SUMMARY)
+	internal fun resolve(id: String, overrides: Map<String, TapAction>): TapAction? =
+		defaultOf(id)?.let { overrides[id] ?: it }
+
+	/**
+	 * Opens whatever the widget [id] stands for, honoring the per-widget
+	 * overrides. Suspends for the shell-backed actions (pull-down, system
+	 * shortcuts).
+	 *
+	 * @param overrides stored [OverlayPrefs.tapActions] map; empty means defaults.
+	 */
+	@Suppress("CyclomaticComplexMethod") // One flat dispatch line per action; splitting the table would scatter the map.
+	suspend fun open(context: Context, id: String, overrides: Map<String, TapAction> = emptyMap()) {
+		when (resolve(id, overrides)) {
+			TapAction.CLOCK -> openAction(context, AlarmClock.ACTION_SHOW_ALARMS)
+			TapAction.CALENDAR -> openDate(context)
+			TapAction.NOTIFICATIONS -> expandNotifications(context)
+			TapAction.BATTERY -> openAction(context, Intent.ACTION_POWER_USAGE_SUMMARY)
 			// HyperOS ships no handler for the AOSP action (verified on device:
 			// ActivityNotFoundException) and its data-usage screen sits behind
 			// the MIUI network-assistant actions; ENTRANCE opens the real
 			// "Data usage" page, SETTINGS is the older-MIUI fallback.
-			Target.DATA_USAGE ->
+			TapAction.DATA_USAGE ->
 				openAction(
 					context,
 					Settings.ACTION_DATA_USAGE_SETTINGS,
 					"miui.intent.action.NETWORKASSISTANT_ENTRANCE",
 					"miui.intent.action.NETWORKASSISTANT_SETTINGS"
 				)
-			Target.WIFI -> openAction(context, Settings.ACTION_WIFI_SETTINGS)
-			Target.MEDIA -> openMedia(context)
-			null -> Unit
+			TapAction.WIFI -> openAction(context, Settings.ACTION_WIFI_SETTINGS)
+			TapAction.MEDIA -> openMedia(context)
+			TapAction.LOCK_SCREEN -> shell(context, "input keyevent KEYCODE_SLEEP", "lock screen")
+			// KEYCODE_SYSRQ is the screenshot key on this firmware; the capture
+			// lands in /sdcard/DCIM/Screenshots (verified on device).
+			TapAction.SCREENSHOT -> shell(context, "input keyevent KEYCODE_SYSRQ", "screenshot")
+			TapAction.AUTO_ROTATE -> toggleAutoRotate(context)
+			TapAction.DND -> toggleDnd(context)
+			TapAction.PLAY_PAUSE ->
+				shell(context, "input keyevent KEYCODE_MEDIA_PLAY_PAUSE", "play/pause")
+			TapAction.TORCH -> toggleTorch(context)
+			TapAction.NONE, null -> Unit
 		}
 	}
 
@@ -82,12 +108,82 @@ internal object BarTapActions {
 	 * same Shizuku dependency.
 	 */
 	suspend fun expandNotifications(context: Context) {
-		val result = ShellRunner.run(EXPAND_NOTIFICATIONS, timeoutSec = EXPAND_TIMEOUT_SEC)
+		val result = ShellRunner.run(EXPAND_NOTIFICATIONS, timeoutSec = CMD_TIMEOUT_SEC)
 		if (result.exit == 0) return
 		// One line per failure kind: a dead Shizuku would otherwise flood the tab.
 		val line = "expand notifications failed (exit ${result.exit}): ${result.out}"
 		Log.w(TAG, line)
 		LogStore.appendOnce(context, "expand-notifications#${result.exit}", "ERROR: $line")
+	}
+
+	/** Runs one shell shortcut and reports a refusal (dead Shizuku, bad syntax) once. */
+	private suspend fun shell(context: Context, cmd: String, label: String) {
+		val result = ShellRunner.run(cmd, timeoutSec = CMD_TIMEOUT_SEC)
+		if (result.exit == 0) return
+		val line = "$label failed (exit ${result.exit}): ${result.out}"
+		Log.w(TAG, line)
+		LogStore.appendOnce(context, "$label#${result.exit}", "ERROR: $line")
+	}
+
+	/**
+	 * Flips auto-rotation: `settings get` first (no dedicated toggle exists
+	 * through the shell), then writes the opposite value.
+	 */
+	private suspend fun toggleAutoRotate(context: Context) {
+		val current = ShellRunner.run("settings get system accelerometer_rotation", timeoutSec = CMD_TIMEOUT_SEC)
+		val enabled = current.out.trim() == "1"
+		shell(context, "settings put system accelerometer_rotation ${if (enabled) 0 else 1}", "auto-rotate toggle")
+	}
+
+	/**
+	 * Flips DND. `settings get secure zen_mode` returns null on HyperOS, so
+	 * the live state comes from `dumpsys notification`; an unreadable state
+	 * is treated as "off" and turns DND on.
+	 */
+	private suspend fun toggleDnd(context: Context) {
+		val current = ShellRunner.run("dumpsys notification | grep -m1 mZenMode", timeoutSec = CMD_TIMEOUT_SEC)
+		val enabled = current.out.contains("mZenMode=") && !current.out.contains("ZEN_MODE_OFF")
+		shell(context, "cmd notification set_dnd ${if (enabled) "off" else "on"}", "dnd toggle")
+	}
+
+	/**
+	 * Flips the flashlight through [CameraManager] (no shell involved). The
+	 * torch callback delivers the current mode of each flash camera right
+	 * after registration, which is the read side of the toggle; the first
+	 * delivery unregisters so repeated taps never leak callbacks. No CAMERA
+	 * permission means SecurityException - logged, and the tap does nothing.
+	 */
+	private fun toggleTorch(context: Context) {
+		val camera = context.getSystemService(CameraManager::class.java) ?: return
+		val hasTorch =
+			camera.cameraIdList.any {
+				camera.getCameraCharacteristics(it).get(CameraCharacteristics.FLASH_INFO_AVAILABLE) == true
+			}
+		if (!hasTorch) {
+			Log.w(TAG, "torch toggle: no flash unit")
+			return
+		}
+		try {
+			camera.registerTorchCallback(
+				object : CameraManager.TorchCallback() {
+					override fun onTorchModeChanged(cameraId: String, enabled: Boolean) {
+						camera.unregisterTorchCallback(this)
+						try {
+							camera.setTorchMode(cameraId, !enabled)
+						} catch (e: Exception) {
+							val line = "torch toggle failed: $e"
+							Log.w(TAG, line)
+							LogStore.append(context, "ERROR: $line")
+						}
+					}
+				},
+				null
+			)
+		} catch (e: Exception) {
+			val line = "torch toggle failed: $e"
+			Log.w(TAG, line)
+			LogStore.append(context, "ERROR: $line")
+		}
 	}
 
 	/**
@@ -115,7 +211,7 @@ internal object BarTapActions {
 		runSafely(context) {
 			try {
 				context.startActivity(
-					Intent(Intent.ACTION_VIEW, Uri.parse("content://com.android/calendar/time"))
+					Intent(Intent.ACTION_VIEW, Uri.parse("content://com.android.calendar/time"))
 						.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 				)
 			} catch (_: Exception) {

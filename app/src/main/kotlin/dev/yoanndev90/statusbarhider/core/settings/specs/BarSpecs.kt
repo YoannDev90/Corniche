@@ -5,6 +5,8 @@ import dev.yoanndev90.statusbarhider.core.settings.BoolSpec
 import dev.yoanndev90.statusbarhider.core.settings.ListSpec
 import dev.yoanndev90.statusbarhider.core.settings.OverlayPrefs
 import dev.yoanndev90.statusbarhider.core.settings.SettingSpec
+import dev.yoanndev90.statusbarhider.core.settings.TapAction
+import dev.yoanndev90.statusbarhider.core.settings.ValueSpec
 import dev.yoanndev90.statusbarhider.core.settings.WidgetId
 
 /**
@@ -50,5 +52,22 @@ object BarSpecs {
 			repair = { order -> WidgetId.parseOrder(order.joinToString(",")) }
 		)
 
-	val specs: List<SettingSpec<*, OverlayPrefs>> = listOf(enabled, hideBarInApps, hiddenApps, widgetOrder)
+	/**
+	 * Per-widget tap overrides: an id missing from the map means "built-in
+	 * default", so the map only ever stores deliberate choices. Keys naming
+	 * an id the bar no longer has (or the spacer) are dropped on load.
+	 */
+	val tapActions =
+		ValueSpec<Map<String, TapAction>, OverlayPrefs>(
+			key = "tap_actions",
+			get = OverlayPrefs::tapActions,
+			set = { p, v -> p.copy(tapActions = v) },
+			default = emptyMap(),
+			coerceValue = { map -> map.filterKeys { it in WidgetId.ALL && it != WidgetId.SPACER } },
+			icon = R.drawable.ic_touch_app,
+			label = R.string.cat_taps
+		)
+
+	val specs: List<SettingSpec<*, OverlayPrefs>> =
+		listOf(enabled, hideBarInApps, hiddenApps, widgetOrder, tapActions)
 }

@@ -22,6 +22,7 @@ import dev.yoanndev90.statusbarhider.core.settings.sections.LogsSection
 import dev.yoanndev90.statusbarhider.core.settings.sections.NotificationSection
 import dev.yoanndev90.statusbarhider.core.settings.sections.OemSection
 import dev.yoanndev90.statusbarhider.core.settings.sections.ProfilesSection
+import dev.yoanndev90.statusbarhider.core.settings.sections.TapSection
 import dev.yoanndev90.statusbarhider.core.settings.sections.missingGrantCount
 import dev.yoanndev90.statusbarhider.ui.screens.settings.ResolvedSection
 import dev.yoanndev90.statusbarhider.ui.screens.settings.searchSections
@@ -39,6 +40,7 @@ class SettingsNavigationTest {
 	private val sectionsByRoute =
 		mapOf(
 			Routes.GENERAL to GeneralSection,
+			Routes.TAPS to TapSection,
 			Routes.APPEARANCE to AppearanceSection,
 			Routes.CUTOUT to CutoutSection,
 			Routes.CLOCK to ClockSection,

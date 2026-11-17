@@ -11,6 +11,7 @@ object Routes {
 	const val HOME = "home"
 	const val SETTINGS = "settings"
 	const val GENERAL = "settings/general"
+	const val TAPS = "settings/taps"
 	const val APPEARANCE = "settings/appearance"
 	const val CUTOUT = "settings/cutout"
 	const val CLOCK = "settings/clock"

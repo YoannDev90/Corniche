@@ -35,6 +35,8 @@
 
     <!-- Settings categories (root list + top bar titles) -->
     <string name="cat_general">General</string>
+    <string name="cat_taps">Tap actions</string>
+    <string name="cat_taps_sub">What each widget does when tapped</string>
     <string name="cat_appearance">Appearance</string>
     <string name="cat_cutout">Cutout / Camera</string>
     <string name="cat_cutout_sub">Notch position and progress ring</string>
@@ -310,6 +312,24 @@
     <string name="widget_alarm">Next alarm</string>
     <string name="widget_bandwidth">Bandwidth</string>
     <string name="widget_unknown">Unknown widget</string>
+
+    <!-- Per-widget tap actions (Tap actions section) -->
+    <string name="tap_dialog_title">Action for %1$s</string>
+    <string name="tap_action_default">Default (%1$s)</string>
+    <string name="tap_action_none">Do nothing</string>
+    <string name="tap_action_clock">Open clock / alarms</string>
+    <string name="tap_action_calendar">Open calendar / next event</string>
+    <string name="tap_action_notifications">Expand notifications</string>
+    <string name="tap_action_battery">Open battery settings</string>
+    <string name="tap_action_data_usage">Open data usage</string>
+    <string name="tap_action_wifi">Open Wi-Fi settings</string>
+    <string name="tap_action_media">Open the playing app</string>
+    <string name="tap_action_lock_screen">Turn the screen off</string>
+    <string name="tap_action_screenshot">Take a screenshot</string>
+    <string name="tap_action_auto_rotate">Toggle auto-rotate</string>
+    <string name="tap_action_dnd">Toggle do not disturb</string>
+    <string name="tap_action_play_pause">Play / pause media</string>
+    <string name="tap_action_torch">Toggle flashlight</string>
 
     <!-- Quick Settings tiles -->
     <string name="tile_custom_bar">Custom bar</string>
