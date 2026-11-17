@@ -7,6 +7,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import dev.yoanndev90.statusbarhider.core.command.ShellRunner
+import dev.yoanndev90.statusbarhider.core.log.LogStore
 import dev.yoanndev90.statusbarhider.core.settings.OverlayPrefs
 import dev.yoanndev90.statusbarhider.data.OverlayPrefsRepository
 import dev.yoanndev90.statusbarhider.overlay.widgets.OverlayBar
@@ -18,6 +20,10 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
+
+/** Which window currently holds input focus, asked through the same shell channel as the tap commands. */
+private const val FOCUS_QUERY = "dumpsys window | grep -m1 mCurrentFocus"
+private const val FOCUS_TIMEOUT_SEC = 5L
 
 /**
  * Hosts the bar window as a [WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY]
@@ -101,12 +107,36 @@ class LockScreenOverlayService : AccessibilityService() {
 		scope.launch { BarTapActions.open(this@LockScreenOverlayService, id, overrides) }
 	}
 
+	private var shadeEventSeq = 0
+
 	override fun onAccessibilityEvent(event: AccessibilityEvent?) {
 		if (event?.eventType != AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) return
-		// A SystemUI window - the shade, a volume panel - became the active one:
-		// the bar steps aside. Anything else becoming active means the shade is
-		// gone and the bar can come back.
-		SharedBar.shadeOpen.value = event.packageName?.toString() == "com.android.systemui"
+		// A window became active: anything but SystemUI means the shade is gone.
+		val pkg = event.packageName?.toString()
+		val cls = event.className?.toString()
+		val seq = ++shadeEventSeq
+		// Evidence line for the shade filter: one entry per window class seen.
+		LogStore.appendOnce(this, "a11y:$pkg/$cls", "a11y window state: pkg=$pkg cls=$cls")
+		if (pkg != "com.android.systemui") {
+			SharedBar.shadeOpen.value = false
+			return
+		}
+		// A SystemUI window became active - the shade, but also a toast (the DND
+		// confirmation) or a volume panel, which would otherwise park the bar
+		// until the next app switch. Only the shade takes input focus, so ask
+		// the window manager instead of trusting the package; an unreadable
+		// answer (no Shizuku) falls back to stepping aside as before.
+		scope.launch {
+			val focused = shadeHasFocus()
+			if (seq == shadeEventSeq) SharedBar.shadeOpen.value = focused
+		}
+	}
+
+	/** True while a shade-like window (NotificationShade, a SystemUI dialog) holds focus. */
+	private suspend fun shadeHasFocus(): Boolean {
+		val result = ShellRunner.run(FOCUS_QUERY, timeoutSec = FOCUS_TIMEOUT_SEC)
+		if (result.exit != 0) return true
+		return result.out.contains("NotificationShade") || result.out.contains("com.android.systemui")
 	}
 
 	override fun onInterrupt() = Unit
