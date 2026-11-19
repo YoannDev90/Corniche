@@ -24,7 +24,7 @@ jobs:
       # and puts it on PATH, so CI lints and formats with the same bytes a local
       # `mise run check` produces. The Android SDK is the one requirement mise
       # does not cover; ubuntu-latest ships it preinstalled.
-      - uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
+      - uses: jdx/mise-action@236a21c3b91f5db6d4e174b348674a0f0caac06d # v5.2.9
 
       - uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6
 
